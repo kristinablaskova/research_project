@@ -12,11 +12,15 @@ def preprocess_data(path):
     data.columns = [c.replace('.', '_') for c in data.columns]
     data_columns = list(data.columns.values)
     hidden_sequence = data[data_columns[34]].tolist()
-    observation_sequence = data[data_columns[0]].tolist()
+    observation_sequence = data.iloc[:,0:34].values.tolist()
+    #observation_sequence = []
+    #for i in range(0, 34):
+    #    observation_sequence.append(data[data_columns[i]].tolist())
     state_names = np.unique(hidden_sequence).tolist()
     return data, data_columns, hidden_sequence, observation_sequence, state_names
 
 data, data_columns, hidden_sequence, observation_sequence, state_names = preprocess_data(path)
+
 
 def create_distributions():
     wake_set = data[data.hypnogram_User == 'Wake']
@@ -24,14 +28,17 @@ def create_distributions():
     nonrem2_set = data[data.hypnogram_User == 'NonREM2']
     nonrem3_set = data[data.hypnogram_User == 'NonREM3']
     rem_set = data[data.hypnogram_User == 'REM']
-    wake_dist = pg.NormalDistribution.from_samples(wake_set[data_columns[0]].tolist())
-    nonrem1_dist = pg.NormalDistribution.from_samples(nonrem1_set[data_columns[0]].tolist())
-    nonrem2_dist = pg.NormalDistribution.from_samples(nonrem2_set[data_columns[0]].tolist())
-    nonrem3_dist = pg.NormalDistribution.from_samples(nonrem3_set[data_columns[0]].tolist())
-    rem_dist = pg.NormalDistribution.from_samples(rem_set[data_columns[0]].tolist())
-    return wake_dist, nonrem1_dist, nonrem2_dist, nonrem3_dist, rem_dist
+    sets = [nonrem1_set, nonrem2_set, nonrem3_set, rem_set, wake_set]
+    state_multidistributions = []
+    for set in sets:
+        state_dist = []
+        for i in range(0, 34):
+            state_dist.append(pg.NormalDistribution.from_samples(set[data_columns[i]].tolist()))
+        state_multidistributions.append(state_dist)
 
-wake_dist, nonrem1_dist, nonrem2_dist, nonrem3_dist, rem_dist = create_distributions()
+    return state_multidistributions
+
+state_multidistributions = create_distributions()
 
 def create_transition_probs():
     chain_model = pg.MarkovChain.from_samples([hidden_sequence])
@@ -42,7 +49,7 @@ chain_model = create_transition_probs()
 model = pg.HiddenMarkovModel('prediction')
 
 states = {}  # type: Dict[str, pg.State]
-dist = [wake_dist, nonrem1_dist, nonrem2_dist, nonrem3_dist, rem_dist]
+dist = [ pg.IndependentComponentsDistribution(x) for x in state_multidistributions ]
 for name in state_names:
     states[name] = pg.State(dist[state_names.index(name)], name=name)
 
