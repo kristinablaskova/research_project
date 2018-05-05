@@ -1,38 +1,35 @@
 from typing import Dict, Iterable
 
-import pandas as pd
-import numpy as np
 import pomegranate as pg
 from sklearn.metrics import confusion_matrix
+from preprocess_functions import *
+from sklearn.model_selection import train_test_split
+from preprocess import df
 
-path = '3.5.2017-Z-F-57let.csv'
-def preprocess_data(path):
-    data = pd.read_csv(path, sep = ";")
-    data = data.replace(',', '.', regex=True)
-    data.columns = [c.replace('.', '_') for c in data.columns]
+
+data = df
+def preprocess_data(data):
+    train, test = train_test_split(data, test_size=0.0, shuffle=False)
     data_columns = list(data.columns.values)
-    hidden_sequence = data[data_columns[34]].tolist()
-    observation_sequence = data.iloc[:,0:34].values.tolist()
-    #observation_sequence = []
-    #for i in range(0, 34):
-    #    observation_sequence.append(data[data_columns[i]].tolist())
+    hidden_sequence = data[data_columns[10]].tolist()
+    observation_sequence = train.iloc[:,0:10].values.tolist()
     state_names = np.unique(hidden_sequence).tolist()
-    return data, data_columns, hidden_sequence, observation_sequence, state_names
+    return data_columns, hidden_sequence, observation_sequence, state_names, train, test
 
-data, data_columns, hidden_sequence, observation_sequence, state_names = preprocess_data(path)
+data_columns, hidden_sequence, observation_sequence, state_names, train, test = preprocess_data(data)
 
 
 def create_distributions():
-    wake_set = data[data.hypnogram_User == 'Wake']
-    nonrem1_set = data[data.hypnogram_User == 'NonREM1']
-    nonrem2_set = data[data.hypnogram_User == 'NonREM2']
-    nonrem3_set = data[data.hypnogram_User == 'NonREM3']
-    rem_set = data[data.hypnogram_User == 'REM']
+    wake_set = train[train.hypnogram_User == 'Wake']
+    nonrem1_set = train[train.hypnogram_User == 'NonREM1']
+    nonrem2_set = train[train.hypnogram_User == 'NonREM2']
+    nonrem3_set = train[train.hypnogram_User == 'NonREM3']
+    rem_set = train[train.hypnogram_User == 'REM']
     sets = [nonrem1_set, nonrem2_set, nonrem3_set, rem_set, wake_set]
     state_multidistributions = []
     for set in sets:
         state_dist = []
-        for i in range(0, 34):
+        for i in range(0, 10):
             state_dist.append(pg.NormalDistribution.from_samples(set[data_columns[i]].tolist()))
         state_multidistributions.append(state_dist)
 
@@ -65,8 +62,9 @@ for prob in chain_model.distributions[1].parameters[0]:
     model.add_transition(state1, state2, probability)
 model.bake()
 
+test_observation_sequence = train.iloc[:, 0:10].values.tolist()
 hmm_fit = model.fit([observation_sequence], labels=[hidden_sequence], algorithm='labeled')
-hmm_pred = model.predict(observation_sequence)
+hmm_pred = model.predict(test_observation_sequence)
 
 conf_hmm = confusion_matrix(hidden_sequence, [state_names[id] for id in hmm_pred], state_names)
 print(conf_hmm)
