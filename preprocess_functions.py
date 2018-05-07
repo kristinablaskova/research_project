@@ -7,6 +7,7 @@ def data_import(path):
     data = pd.read_csv(path, sep = ";")
     data = data.replace(',', '.', regex=True)
     data.columns = [c.replace('.', '_') for c in data.columns]
+    data = data.iloc[:,0:36]
     return data
 
 #prepares the data for feature selection
@@ -22,7 +23,7 @@ def select_kbest(X_feature, y, number_of_besties):
     selector.fit(X_feature, y)
     results = -np.log10(selector.pvalues_)
     X_transformed = selector.fit_transform(X_feature, y).copy()
-    return X_transformed, results
+    return X_transformed, results, selector
 
 #Percentile function - helps us select the relevant features
 def select_percentile(X_feature, y, percentile):
@@ -33,9 +34,9 @@ def select_percentile(X_feature, y, percentile):
     return X_transformed, results
 
 #see results of percentile or kbest function
-def get_names(predictors, results):
-    scores_dict = {}
-    for i in range(0, len(predictors)):
-        scores_dict[predictors[i]] = results[i]
-    best_features_sorted = sorted(scores_dict, key=scores_dict.get, reverse=True)
-    return best_features_sorted
+def get_names(selector, X_feature):
+    feature_names = []
+    for i in range(0, X_feature.shape[1]):
+        if selector.get_support()[i]:
+            feature_names.append(X_feature.columns[i])
+    return feature_names

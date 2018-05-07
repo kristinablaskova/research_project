@@ -8,6 +8,7 @@ from preprocess import *
 
 
 def run_hmm_on_files(path):
+    print(path)
 
     data = preprocess_any_file(path)
 
@@ -15,7 +16,12 @@ def run_hmm_on_files(path):
     def preprocess_data(data):
         train, test = train_test_split(data, test_size=0.0, shuffle=False)
         data_columns = list(data.columns.values)
+
         hidden_sequence = data[data_columns[10]].tolist()
+        for i in range(0, len(hidden_sequence)):
+            if hidden_sequence[i] == "NotScored":
+                hidden_sequence[i] = hidden_sequence[i - 1]
+
         observation_sequence = train.iloc[:, 0:10].values.tolist()
         state_names = np.unique(hidden_sequence).tolist()
         return data_columns, hidden_sequence, observation_sequence, state_names, train, test
