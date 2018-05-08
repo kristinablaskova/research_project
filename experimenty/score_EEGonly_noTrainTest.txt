@@ -1,0 +1,34 @@
+Tento experiment pouziva Kbest s 10 top features.
+Pouzivaju sa vsak iba EEG hodnoty.
+Vysledkom je pacientovo skore.
+
+experimental_df.describe()
+           skore
+count  79.000000
+mean    0.769527
+std     0.075051
+min     0.555897
+25%     0.720664
+50%     0.783567
+75%     0.812624
+max     0.905299
+
+V druhom experimente sa uz pouzivaju aj binarne hodnoty,
+dalej sa fixol bug s tym, ze sa predpokladalo, ze kazdy clovek
+musi mat vsetkych 5 stavov (pacient spal zle a mal len 3 stavy).
+Ako popisuje stlpec, pouzivaju sa gaussovske kernel densities.
+
+
+experimental_df1.describe()
+       skore_gauss  gauss_kernel_binar
+count    79.000000           79.000000
+mean      0.769527            0.806508
+std       0.075051            0.059962
+min       0.555897            0.611410
+25%       0.720664            0.776735
+50%       0.783567            0.812625
+75%       0.812624            0.844405
+max       0.905299            0.927847
+
+Vo vseobecnosti sa presnost predpovede zvysila.
+
