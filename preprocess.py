@@ -1,4 +1,4 @@
-from preprocess_functions import *
+from feature_selection import *
 import pandas as pd
 
 #uses the functions from preprocess_functions to preprocess the data

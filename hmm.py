@@ -71,5 +71,6 @@ def run_hmm_on_files(path, n_features):
     except ValueError:
         print('nejaky valueerror - napr nepozna stlpec hypnogram user')
         score = "NaN"
+        feature_names = []
 
-    return poznamka, score
+    return poznamka, score, feature_names

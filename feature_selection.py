@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.feature_selection import SelectKBest, f_classif, SelectPercentile
 import numpy as np
+#from run_model_all_data import run_separate
+import os
+directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data_hradec')
 
 #imports data and replace , with . to read numbers as float
 class Preprocess(object):
@@ -45,3 +48,8 @@ class Preprocess(object):
             if selector.get_support()[i]:
                 feature_names.append(X_feature.columns[i])
         return feature_names
+
+    #tells us which features to use globally on all data
+    '''def which_f_globally(self):
+        features_all_patients = run_separate(directory)'''
+
