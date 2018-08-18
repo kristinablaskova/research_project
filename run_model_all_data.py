@@ -1,8 +1,10 @@
 import os
 from hmm import run_hmm_on_files
 import pandas as pd
-directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
 import preprocess as pr
+
+
+directory = os.fsencode('./Data')
 
 #run hidden markov on all files separately
 def run_separate(directory):
@@ -56,7 +58,7 @@ def run_group(group_experiment_features, directory):
     return cols, data
 #cols, data = run_group(features_group_experiment, directory)
 
-directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
+directory = os.fsencode('./Data')
 list_of_patients_with_attributes = pd.DataFrame(['file_name','sex','age'])
 for file in os.listdir(directory):
     filename = os.fsdecode(file)

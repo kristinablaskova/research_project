@@ -1,10 +1,11 @@
 from typing import Dict, Iterable
 
 import pomegranate as pg
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
-from preprocess import *
-from dist import Distributions
+import sklearn.metrics as metrics
+import sklearn.model_selection as ms
+import data_preprocessing as dp
+import numpy as np
+import dist as dst
 
 #run hmm separately on files
 def run_hmm_on_files(path, n_features):
@@ -12,11 +13,11 @@ def run_hmm_on_files(path, n_features):
     try:
         print(path)
 
-        data, n_features, feature_names = preprocess_any_file(path, n_features)
+        data, n_features, feature_names = dp.preprocess_any_file(path, n_features)
 
 
         def preprocess_data(data):
-            train, test = train_test_split(data, test_size=0.0, shuffle=False)
+            train, test = ms.train_test_split(data, test_size=0.0, shuffle=False)
             data_columns = list(data.columns.values)
             hidden_sequence = data['hypnogram_User'].tolist()
             l = len(hidden_sequence)
@@ -51,7 +52,7 @@ def run_hmm_on_files(path, n_features):
 
 
         data_columns, hidden_sequence, observation_sequence, train, test = preprocess_data(data)
-        hmm_dist = Distributions(train)
+        hmm_dist = dst.Distributions(train)
         dist, state_names = hmm_dist.gauss_kernel_dist(feature_names)
         model = pg.HiddenMarkovModel('prediction')
         create_states(model, hidden_sequence, state_names)
@@ -61,7 +62,7 @@ def run_hmm_on_files(path, n_features):
         #hmm_fit = model.fit([observation_sequence], labels=[hidden_sequence], algorithm='labeled')
         hmm_pred = model.predict(test_observation_sequence)
 
-        conf_hmm = confusion_matrix(hidden_sequence, [state_names[id] for id in hmm_pred], state_names)
+        conf_hmm = metrics.confusion_matrix(hidden_sequence, [state_names[id] for id in hmm_pred], state_names)
         #print(conf_hmm)
         #print(state_names)
 

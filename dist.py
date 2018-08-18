@@ -1,8 +1,5 @@
 import pomegranate as pg
 import numpy as np
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
-from feature_selection import Preprocess
 
 class Distributions(object):
 
