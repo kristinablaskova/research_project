@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.feature_selection import SelectKBest, f_classif, SelectPercentile
 import numpy as np
-#from run_model_all_data import run_separate
+import preprocess as pr
 import os
 directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data_hradec')
 
@@ -49,7 +49,15 @@ class Preprocess(object):
                 feature_names.append(X_feature.columns[i])
         return feature_names
 
-    #tells us which features to use globally on all data
-    '''def which_f_globally(self):
-        features_all_patients = run_separate(directory)'''
+    #find top 10 features for the group of patients
+    def find_group_features(self, directory):
+        features_all_patients = []
+        for file in os.listdir(directory):
+
+            filename = os.fsdecode(file)
+            if filename.endswith(".csv"):
+                path = str(directory)[2:-1] + "/" + str(filename)
+                df, n_features, feature_names = pr.preprocess_any_file(path, n_features=10)
+                features_all_patients.extend(feature_names)
+        return features_all_patients
 

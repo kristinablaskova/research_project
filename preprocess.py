@@ -1,7 +1,9 @@
 from feature_selection import *
+# import feature_selection as fs
 import pandas as pd
 
 #uses the functions from preprocess_functions to preprocess the data
+
 def preprocess_any_file(path, n_features):
     prep = Preprocess()
     data = prep.data_import(path)
