@@ -59,7 +59,7 @@ def find_group_features(self, directory):
             features_all_patients.extend(feature_names)
     return features_all_patients
 
-
+# this imports data as well as runs the select kbest features
 def preprocess_any_file(path, n_features):
     data = data_import(path)
     X_feature, y, predictors = prep_data_feature_selection(data)
@@ -68,3 +68,8 @@ def preprocess_any_file(path, n_features):
     df = pd.DataFrame(X_transformed, columns=features)
     df['hypnogram_User'] = y
     return df, n_features, features
+
+# to be done
+# drops scoring of random series of rows for semisupervised learning of HMM
+def my_train_test_split_individual_person():
+    pass

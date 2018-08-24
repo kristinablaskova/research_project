@@ -1,0 +1,86 @@
+import pandas as pd
+import sklearn.model_selection as ms
+import os
+import data_preprocessing as dp
+import dist as dst
+import pomegranate as pg
+
+#LOAD PATIENT LIST AND SPLIT IT TO TRAINING AND TESTING SET
+list_of_patients = pd.read_csv("/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv")
+list_of_training_patients, list_of_testing_patients = ms.train_test_split(list_of_patients, test_size=0.3, shuffle=True)
+
+#LEARN MODEL ON FIRST TRAINING SET PATIENT
+directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
+
+list_of_training_patients = list_of_training_patients.reset_index()
+path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][0])
+first_patient = dp.data_import(path)
+df1 = first_patient.pop('hypnogram_User')
+first_patient['hypnogram_User']=df1
+
+poznamka = []
+feature_names = first_patient.drop(['hypnogram_User', 'hypnogram_Machine'], axis=1).columns.values.tolist()
+binary_features = ["Gain", "Bradycardia", "LegMovement", "CentralApnea", "Arousal", "Hypopnea",
+                           "RelativeDesaturation", "Snore", "ObstructiveApnea", "MixedApnea", "LongRR", "Tachycardia"]
+for feature in binary_features:
+    if feature in first_patient.columns:
+        first_patient = first_patient.drop(feature, axis=1)
+
+n_features = first_patient.shape[0] - 2
+
+
+def preprocess_data(data):
+    train, test = ms.train_test_split(data, test_size=0.0, shuffle=False)
+    data_columns = list(data.columns.values)
+    hidden_sequence = data['hypnogram_User'].tolist()
+    l = len(hidden_sequence)
+    for i in reversed(range(0, l)):
+        if hidden_sequence[i] == "NotScored":
+            train = train.drop([i])
+            del hidden_sequence[i]
+    train = train.drop(['hypnogram_Machine'], axis=1)
+    observation_sequence = train.iloc[:, 0:n_features].values.tolist()
+    return data_columns, hidden_sequence, observation_sequence, train, test
+
+
+def create_states(model, hidden_sequence, state_names):
+    chain_model = pg.MarkovChain.from_samples([hidden_sequence])
+    states = {}  # type: Dict[str, pg.State]
+    for name in state_names:
+        states[name] = pg.State(dist[state_names.index(name)], name=name)
+    model.add_states(list(states.values()))
+    # sets the starting probability for state 'Wake' to 1.0
+    try:
+        model.add_transition(model.start, states['Wake'], 1.0)
+        poznamka.append("")
+    except KeyError:
+        print("nezacina wake")
+        poznamka.append('nezacina wake')
+        pass
+    # insert the emission probabilities, that we computed in summary
+    for prob in chain_model.distributions[1].parameters[0]:
+        state1 = states[prob[0]]
+        state2 = states[prob[1]]
+        probability = prob[2]
+        model.add_transition(state1, state2, probability)
+
+data_columns, hidden_sequence, observation_sequence, train, test = preprocess_data(data = first_patient)
+hmm_dist = dst.Distributions(train)
+dist, state_names = hmm_dist.gauss_kernel_dist(feature_names)
+
+model = pg.HiddenMarkovModel('prediction')
+create_states(model, hidden_sequence, state_names)
+model.bake()
+
+for i in range(1, len(list_of_training_patients['file_name'])):
+    path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][i])
+    next_patient = dp.data_import(path)
+    for feature in binary_features:
+        if feature in next_patient.columns:
+            next_patient = next_patient.drop(feature, axis=1)
+    df1 = next_patient.pop('hypnogram_User')
+    next_patient['hypnogram_User'] = df1
+    hidden_sequence = next_patient['hypnogram_User'].tolist()
+    next_patient = next_patient.drop(['hypnogram_Machine', 'hypnogram_User'], axis=1)
+    observation_sequence = next_patient.iloc[:, 0:n_features].values.tolist()
+    hmm_fit = model.fit([observation_sequence], labels=hidden_sequence, algorithm='labeled')

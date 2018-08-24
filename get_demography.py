@@ -1,15 +1,25 @@
+import os
 import pandas as pd
 
-path = "/Users/kristina/PycharmProjects/vyskumak/experimenty/1score_EEGonly_noTrainTest.csv"
-df = pd.read_csv(path)
-df['datum'], df['zdravie'], df['pohlavie'], df['vek'], df['nezname'] = df['pacient'].str.split('-').str
-df['spinacopy'] = df['nezname']
-for i in range(0,df.shape[0]):
-    if df['zdravie'][i] == "kinect" or df['zdravie'][i] == 'kinekt':
-        df['spinacopy'][i] = df['zdravie'][i]
-        df['zdravie'][i] = df['pohlavie'][i]
-        df['pohlavie'][i] = df['vek'][i]
-        df['vek'][i] = df['nezname'][i]
-        df['nezname'] = df['spinacopy']
-df = df.drop(['spinacopy'], axis = 1)
-df.to_csv('extracted_properties.csv', sep = ',')
+directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
+list_of_patients_with_attributes = pd.DataFrame(['file_name','sex','age'])
+for file in os.listdir(directory):
+    filename = os.fsdecode(file)
+    if filename.endswith(".csv"):
+        start = filename.find('-Z-') + 3
+        end = filename.find('let', start)
+        sex_and_age = filename[start:end]
+        sex = sex_and_age[0]
+        age = sex_and_age[2:]
+        list_of_patients_with_attributes = list_of_patients_with_attributes.append({'file_name': filename,
+                                                                                    'sex': sex, 'age': age},
+                                                                                   ignore_index=True)
+
+list_of_patients_with_attributes = list_of_patients_with_attributes.dropna(subset=['age'])
+list_of_patients_with_attributes = list_of_patients_with_attributes[list_of_patients_with_attributes['age']
+                                                                    != '1.2016-AN-M-72']
+list_of_patients_with_attributes['age'] = list_of_patients_with_attributes['age'].astype('int')
+list_of_patients_with_attributes = list_of_patients_with_attributes.drop(list_of_patients_with_attributes.columns[0], axis=1)
+
+list_of_patients_with_attributes.to_csv(
+    '/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv', sep=',')

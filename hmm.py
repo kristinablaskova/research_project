@@ -1,5 +1,6 @@
 from typing import Dict, Iterable
-
+import pandas as pd
+import os
 import pomegranate as pg
 import sklearn.metrics as metrics
 import sklearn.model_selection as ms
@@ -17,7 +18,7 @@ def run_hmm_on_files(path, n_features):
 
 
         def preprocess_data(data):
-            train, test = ms.train_test_split(data, test_size=0.0, shuffle=False)
+            train, test = ms.train_test_split(data, test_size=0.3, shuffle=False)
             data_columns = list(data.columns.values)
             hidden_sequence = data['hypnogram_User'].tolist()
             l = len(hidden_sequence)
@@ -76,6 +77,16 @@ def run_hmm_on_files(path, n_features):
 
     return poznamka, score
 
+#LOAD PATIENT LIST AND SPLIT IT TO TRAINING AND TESTING SET
+list_of_patients = pd.read_csv("/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv")
+list_of_training_patients, list_of_testing_patients = ms.train_test_split(list_of_patients, test_size=0.3, shuffle=True)
+
+#LEARN MODEL ON FIRST TRAINING SET PATIENT
+directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
+
+list_of_training_patients = list_of_training_patients.reset_index()
+path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][0])
+poznamka, score = run_hmm_on_files(path, n_features=10)
 #run hmm on files as group
 '''
 def run_hmm_on_files(path, n_features):
