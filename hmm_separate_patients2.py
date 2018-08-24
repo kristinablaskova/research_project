@@ -99,14 +99,27 @@ for i in range(0, len(list_of_patients['file_name'])):
         data_columns, hidden_sequence, observation_sequence, train1, test = preprocess_data(data=patient_data)
 
         test_observation_sequence = train1.iloc[:, 0:n_features].values.tolist()
-        try:
-            hmm_pred = model.predict(test_observation_sequence, algorithm = 'viterbi')
 
-            conf_hmm = metrics.confusion_matrix(hidden_sequence, [state_names[id] for id in hmm_pred], state_names)
-            print(conf_hmm)
-            print(state_names)
-            state_ids = np.array([state_names.index(val) for val in hidden_sequence])
-            score = (np.array(hmm_pred) == state_ids).mean()
-            print(score)
-        except:
-            print("nesiel viterbi")
+        # REWRITTEN model.predict()
+        viterbi_result = model.viterbi(test_observation_sequence)
+        if viterbi_result[1] is None:
+            print('Dropping patient')
+            continue
+
+        hmm_pred = [state_id for state_id, state in viterbi_result[1]]
+        ##########
+
+        # SANITY CHECKS
+        for v in range(0, len(hmm_pred)):
+            if 4 < hmm_pred[v] or hmm_pred[v] < 0:
+                print(v, hmm_pred[v])
+
+        print(len(hidden_sequence), len(hmm_pred))
+        ##########
+
+        conf_hmm = metrics.confusion_matrix(hidden_sequence, [state_names[min(id, 4)] for id in hmm_pred][1:], state_names)
+        print(conf_hmm)
+        print(state_names)
+        state_ids = np.array([state_names.index(val) for val in hidden_sequence])
+        score = (np.array(hmm_pred[1:]) == state_ids).mean()
+        print(score)
