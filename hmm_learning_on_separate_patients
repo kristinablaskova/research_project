@@ -6,14 +6,13 @@ import dist as dst
 import pomegranate as pg
 
 #LOAD PATIENT LIST AND SPLIT IT TO TRAINING AND TESTING SET
-list_of_patients = pd.read_csv("/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv")
+list_of_patients = pd.read_csv("experimenty/list_of_patients_with_attributes.csv")
 list_of_training_patients, list_of_testing_patients = ms.train_test_split(list_of_patients, test_size=0.3, shuffle=True)
 
 #LEARN MODEL ON FIRST TRAINING SET PATIENT
-directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
 
 list_of_training_patients = list_of_training_patients.reset_index()
-path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][0])
+path = "Data/"+ str(list_of_training_patients['file_name'][0])
 first_patient = dp.data_import(path)
 df1 = first_patient.pop('hypnogram_User')
 first_patient['hypnogram_User']=df1
@@ -73,7 +72,7 @@ create_states(model, hidden_sequence, state_names)
 model.bake()
 
 for i in range(1, len(list_of_training_patients['file_name'])):
-    path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][i])
+    path = "Data/"+ str(list_of_training_patients['file_name'][i])
     next_patient = dp.data_import(path)
     for feature in binary_features:
         if feature in next_patient.columns:

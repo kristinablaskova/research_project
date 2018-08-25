@@ -9,9 +9,8 @@ import sklearn.metrics as metrics
 
 
 #LOAD PATIENT LIST AND SPLIT IT TO TRAINING AND TESTING SET
-list_of_patients = pd.read_csv("/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv")
+list_of_patients = pd.read_csv("experimenty/list_of_patients_with_attributes.csv")
 #LEARN MODEL ON FIRST TRAINING SET PATIENT
-directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
 poznamka = []
 
 def preprocess_data(data):
@@ -52,7 +51,7 @@ def create_states(model, hidden_sequence, state_names):
 
 for i in range(0, len(list_of_patients['file_name'])):
     list_of_testing_patients = list_of_patients.iloc[[i]]
-    list_of_training_patients = list_of_patients.drop([0], axis=0)
+    list_of_training_patients = list_of_patients.drop([i], axis=0)
 
     list_of_training_patients = list_of_training_patients.reset_index()
     training_feature_array = []
@@ -60,7 +59,7 @@ for i in range(0, len(list_of_patients['file_name'])):
     train_df = pd.DataFrame()
 
     for i in range(list_of_training_patients.shape[0]):
-        path = str(directory)[2:-1] + "/" + str(list_of_training_patients['file_name'][0])
+        path = "Data/"+ str(list_of_training_patients['file_name'][0])
         patient_data = dp.data_import(path)
         binary_features = ["Gain", "Bradycardia", "LegMovement", "CentralApnea", "Arousal", "Hypopnea",
                                    "RelativeDesaturation", "Snore", "ObstructiveApnea", "MixedApnea", "LongRR", "Tachycardia"]
@@ -86,7 +85,7 @@ for i in range(0, len(list_of_patients['file_name'])):
     list_of_testing_patients = list_of_testing_patients.reset_index()
 
     for i in range(list_of_testing_patients.shape[0]):
-        path = str(directory)[2:-1] + "/" + str(list_of_testing_patients['file_name'][i])
+        path = "Data/"+ str(list_of_testing_patients['file_name'][i])
         patient_data = dp.data_import(path)
         binary_features = ["Gain", "Bradycardia", "LegMovement", "CentralApnea", "Arousal", "Hypopnea",
                                    "RelativeDesaturation", "Snore", "ObstructiveApnea", "MixedApnea", "LongRR", "Tachycardia"]

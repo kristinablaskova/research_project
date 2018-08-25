@@ -1,7 +1,6 @@
 import os
 from hmm import run_hmm_on_files
 import pandas as pd
-import preprocess as pr
 
 
 directory = os.fsencode('./Data')

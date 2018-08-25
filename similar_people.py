@@ -1,16 +1,22 @@
-import os
 import pandas as pd
-import hmm as myhmm
-import matplotlib.pyplot as plt
 import data_preprocessing as dp
 
 
-directory = os.fsencode('/Users/kristina/PycharmProjects/vyskumak/Data')
 list_of_patients_with_attributes = pd.read_csv(
-    "/Users/kristina/PycharmProjects/vyskumak/experimenty/list_of_patients_with_attributes.csv")
+    "experimenty/list_of_patients_with_attributes.csv")
 
-females = list_of_patients_with_attributes[list_of_patients_with_attributes['sex'] == 'F']
-males = list_of_patients_with_attributes[list_of_patients_with_attributes['sex'] == 'M']
+testing_patient_path = "Data/"  + str(list_of_patients_with_attributes['file_name'][0])
+testing_patient_data = dp.data_import(testing_patient_path)
+testing_patient_series = testing_patient_data['EEG_F3_A2: DELTA'].values.tolist()
+list_of_training_patients = list_of_patients_with_attributes.drop([0], axis=0)
+list_of_training_patients = list_of_training_patients.reset_index()
+
+for j in range(1, len(list_of_training_patients['file_name'])):
+    path = "Data/" + str(list_of_training_patients['file_name'][j])
+    print(path)
+    #data = dp.data_import(path)
+
+
 
 # for female_file in females['file_name'][:2]:
 #     path = str(directory)[2:-1] + "/" + str(filename)
