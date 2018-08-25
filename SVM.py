@@ -40,8 +40,8 @@ for i in range(0, len(list_of_patients['file_name'])):
 
     X_train = np.ndarray(shape=(0,34))
     y_train = []
-    for i in range(list_of_training_patients.shape[0]):
-        path = "Data/"+ str(list_of_training_patients['file_name'][0])
+    for j in range(list_of_training_patients.shape[0]):
+        path = "Data/"+ str(list_of_training_patients['file_name'][j])
         patient_data = dp.data_import(path)
         binary_features = ["Gain", "Bradycardia", "LegMovement", "CentralApnea", "Arousal", "Hypopnea",
                                    "RelativeDesaturation", "Snore", "ObstructiveApnea", "MixedApnea", "LongRR", "Tachycardia"]

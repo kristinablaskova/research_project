@@ -10,12 +10,14 @@ import numpy as np
 list_of_patients = pd.read_csv("experimenty/list_of_patients_with_attributes.csv")
 #LEARN MODEL ON FIRST TRAINING SET PATIENT
 score=[]
+print("zacal")
 
 for i in range(0, len(list_of_patients['file_name'])):
     list_of_testing_patients = list_of_patients.iloc[[i]]
     list_of_testing_patients = list_of_testing_patients.reset_index()
     list_of_training_patients = list_of_patients.drop([i], axis=0)
     list_of_training_patients = list_of_training_patients.reset_index()
+    print(".")
 
 
 # PREPROCESS TESTING FILE
@@ -55,7 +57,7 @@ for i in range(0, len(list_of_patients['file_name'])):
         y_train = np.append(train_hidden_sequence, y_train)
 
 
-    classifier = KNeighborsClassifier(n_neighbors=1)
+    classifier = KNeighborsClassifier(n_neighbors=500)
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(test_observation_sequence)
     score = np.append(score,(y_pred == test_hidden_sequence).mean())
