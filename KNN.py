@@ -55,7 +55,7 @@ for i in range(0, len(list_of_patients['file_name'])):
         y_train = np.append(train_hidden_sequence, y_train)
 
 
-    classifier = KNeighborsClassifier(n_neighbors=10)
+    classifier = KNeighborsClassifier(n_neighbors=1)
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(test_observation_sequence)
     score = np.append(score,(y_pred == test_hidden_sequence).mean())
